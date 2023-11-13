@@ -1,7 +1,8 @@
 package me.boomber.item_trait.trait;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import org.jetbrains.annotations.Nullable;
 
 public interface TraitFactory {
-    Trait create(CompoundTag tag);
+    @Nullable Trait create(Tag tag);
 }

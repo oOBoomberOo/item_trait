@@ -1,6 +1,9 @@
 package me.boomber.item_trait.trait;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -10,7 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 public class Trait {
     public Trait() {}
@@ -19,8 +22,12 @@ public class Trait {
         TraitRegistry.INSTANCE.getOrCreate(itemStack).forEach(action);
     }
 
-    public static void register(String name, TraitFactory factory) {
+    public static void register(String name, Function<CompoundTag, Trait> factory) {
         TraitRegistry.INSTANCE.register(name, factory);
+    }
+
+    public static void registerList(String name, Function<ListTag, Trait> factory) {
+        TraitRegistry.INSTANCE.registerList(name, factory);
     }
 
     public void onRelease(Level level, LivingEntity entity, ItemStack itemStack) {}
@@ -33,7 +40,7 @@ public class Trait {
 
     public void onUse(Level world, Player player, InteractionHand hand, ItemStack itemStack) {}
 
-    public void onMine(Level world, LivingEntity miner, BlockState blockState, BlockPos blockPos, ItemStack itemStack) {}
+    public void onMine(Level world, LivingEntity miner, BlockState blockState, BlockPos blockPos, Direction direction, ItemStack itemStack) {}
 
     public void onHurt(Level level, LivingEntity attacker, LivingEntity target, ItemStack itemStack) {}
 

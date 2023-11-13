@@ -24,11 +24,4 @@ public abstract class LivingEntityMixin {
 
         Trait.perform(itemStack, it -> it.onStartUsing(entity, itemStack));
     }
-
-    @Inject(method = "hurtCurrentlyUsedShield", at = @At("HEAD"))
-    public void onBlocked(float f, CallbackInfo ci) {
-        var itemStack = getUseItem();
-        var entity = (LivingEntity) (Object) this;
-        Trait.perform(itemStack, it -> it.onBlocked(entity, itemStack));
-    }
 }

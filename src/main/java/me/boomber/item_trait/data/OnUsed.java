@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import me.boomber.item_trait.trait.Trait;
 import me.boomber.item_trait.utils.CommandCallback;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -25,5 +26,11 @@ public class OnUsed extends Trait {
         if (delay != null) {
             player.getCooldowns().addCooldown(item, delay);
         }
+    }
+
+    public static OnUsed parse(CompoundTag tag) {
+        var command = CommandCallback.get(tag, "command");
+        var delay = tag.getShort("delay");
+        return new OnUsed(command, delay);
     }
 }

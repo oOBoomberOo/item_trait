@@ -26,16 +26,6 @@ public class ItemMixin {
         Trait.perform(itemStack, it -> it.onUse(level, player, interactionHand, itemStack));
     }
 
-    @Inject(method = "mineBlock", at = @At("HEAD"))
-    public void mineBlock(ItemStack itemStack, Level level, BlockState blockState, BlockPos blockPos, LivingEntity livingEntity, CallbackInfoReturnable<Boolean> cir) {
-        Trait.perform(itemStack, it -> it.onMine(level, livingEntity, blockState, blockPos, itemStack));
-    }
-
-    @Inject(method = "hurtEnemy", at = @At("HEAD"))
-    public void hurtEnemy(ItemStack itemStack, LivingEntity attacker, LivingEntity target, CallbackInfoReturnable<Boolean> cir) {
-        Trait.perform(itemStack, it -> it.onHurt(attacker.level(), attacker, target, itemStack));
-    }
-
     @Inject(method = "inventoryTick", at = @At("HEAD"))
     public void onInventory(ItemStack itemStack, Level level, Entity entity, int i, boolean bl, CallbackInfo ci) {
         Trait.perform(itemStack, it -> it.onInventoryTick(level, entity, itemStack));

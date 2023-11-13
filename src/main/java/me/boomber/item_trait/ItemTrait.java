@@ -1,16 +1,19 @@
 package me.boomber.item_trait;
 
 import me.boomber.item_trait.data.*;
+import me.boomber.item_trait.impl.PlayerBreakBlockTrait;
+import me.boomber.item_trait.packet.PlayerSwingPacket;
 import me.boomber.item_trait.trait.Trait;
-import me.boomber.item_trait.trait.TraitRegistry;
 import me.boomber.item_trait.utils.CommandCallback;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ClipContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,16 +30,12 @@ public class ItemTrait implements ModInitializer {
         LOGGER.info("initialized mod");
 
         registerEvents();
+        registerNetwork();
 
-        Trait.register("on_used", nbt -> {
-            var command = CommandCallback.get(nbt, "command");
-            var delay = nbt.getShort("delay");
-            return new OnUsed(command, delay);
-        });
+        Trait.register("on_used", OnUsed::parse);
 
-        Trait.register("tipped", nbt -> {
-            var effects = nbt.getList("effects", Tag.TAG_COMPOUND)
-                    .stream()
+        Trait.registerList("effects", nbt -> {
+            var effects = nbt.stream()
                     .map(it -> (CompoundTag) it)
                     .map(it -> (Supplier<MobEffectInstance>) () -> MobEffectInstance.load(it))
                     .toList();
@@ -50,16 +49,13 @@ public class ItemTrait implements ModInitializer {
         });
 
         Trait.register("shield", nbt -> {
-            var onBlocked = CommandCallback.get(nbt, "on_block");
+            var onBlocked = CommandCallback.get(nbt, "on_blocked");
             var onStartBlocking = CommandCallback.get(nbt, "on_start_blocking");
             var onStopBlocking = CommandCallback.get(nbt, "on_stop_blocking");
             return new Shield(onBlocked, onStartBlocking, onStopBlocking);
         });
 
-        Trait.register("on_swing", nbt -> {
-            var command = CommandCallback.get(nbt, "command");
-            return new OnSwing(command);
-        });
+        Trait.register("on_swing", OnSwing::parse);
 
         Trait.register("on_attacked", nbt -> {
             var attacker = CommandCallback.get(nbt, "attacker_command");
@@ -75,14 +71,19 @@ public class ItemTrait implements ModInitializer {
             }
 
             var itemStack = player.getItemInHand(hand);
-            Trait.perform(itemStack, it -> it.onSwing(world, player, itemStack));
+            Trait.perform(itemStack, it -> {
+                if (entity instanceof LivingEntity e) {
+                    it.onHurt(world, player, e, itemStack);
+                }
+            });
+
             return InteractionResult.PASS;
         });
 
-        AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
-            var itemStack = player.getItemInHand(hand);
-            Trait.perform(itemStack, it -> it.onSwing(world, player, itemStack));
-            return InteractionResult.PASS;
-        });
+        PlayerBlockBreakEvents.BEFORE.register(new PlayerBreakBlockTrait());
+    }
+
+    private void registerNetwork() {
+        ServerPlayNetworking.registerGlobalReceiver(PlayerSwingPacket.ID, PlayerSwingPacket::handle);
     }
 }

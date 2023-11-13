@@ -2,20 +2,35 @@ package me.boomber.item_trait.trait;
 
 import me.boomber.item_trait.ItemTrait;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 public class TraitRegistry {
     public static final String TRAIT_KEY = "traits";
     public static final TraitRegistry INSTANCE = new TraitRegistry();
 
-    public <T> void register(String name, TraitFactory factory) {
-        registry.put(name, factory);
+    public void register(String name, Function<CompoundTag, Trait> factory) {
+        registry.put(name, registerAs(factory, CompoundTag.class));
         ItemTrait.LOGGER.info("Registered trait: {}", name);
+    }
+
+    public void registerList(String name, Function<ListTag, Trait> factory) {
+        registry.put(name, registerAs(factory, ListTag.class));
+        ItemTrait.LOGGER.info("Registered trait: {}", name);
+    }
+
+    private <T> TraitFactory registerAs(Function<T, Trait> factory, Class<T> type) {
+        return tag -> {
+            if (type.isAssignableFrom(tag.getClass())) {
+                var content = type.cast(tag);
+                return factory.apply(content);
+            } else {
+                return null;
+            }
+        };
     }
 
     public List<Trait> getOrCreate(ItemStack itemStack) {
@@ -36,9 +51,14 @@ public class TraitRegistry {
         var result = new ArrayList<Trait>();
 
         registry.forEach((name, factory) -> {
-            if (traitKeys.contains(name)) {
-                var nbt = traits.getCompound(name);
-                var trait = factory.create(nbt);
+            if (!traitKeys.contains(name)) {
+                return;
+            }
+
+            var nbt = traits.get(name);
+            var trait = factory.create(nbt);
+
+            if (trait != null) {
                 result.add(trait);
             }
         });
