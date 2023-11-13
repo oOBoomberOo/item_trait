@@ -22,10 +22,6 @@ public class TraitRegistry {
         return cache.computeIfAbsent(itemStack, this::create);
     }
 
-    public void perform(ItemStack itemStack, Consumer<Trait> action) {
-        getOrCreate(itemStack).forEach(action);
-    }
-
     private final Map<String, TraitFactory> registry = new HashMap<>();
     private final WeakHashMap<ItemStack, List<Trait>> cache = new WeakHashMap<>();
 
@@ -53,10 +49,5 @@ public class TraitRegistry {
     private Optional<CompoundTag> getTraits(ItemStack itemStack) {
         return Optional.ofNullable(itemStack.getTag())
                 .map(it -> it.getCompound(TRAIT_KEY));
-    }
-
-    private Optional<CompoundTag> getTraitData(ItemStack itemStack, String name) {
-        return getTraits(itemStack)
-                .map(it -> it.getCompound(name));
     }
 }
