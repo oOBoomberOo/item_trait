@@ -48,6 +48,24 @@ public class ItemTrait implements ModInitializer {
             var size = nbt.getInt("size");
             return new Pickaxe(size);
         });
+
+        Trait.register("shield", nbt -> {
+            var onBlocked = CommandCallback.get(nbt, "on_block");
+            var onStartBlocking = CommandCallback.get(nbt, "on_start_blocking");
+            var onStopBlocking = CommandCallback.get(nbt, "on_stop_blocking");
+            return new Shield(onBlocked, onStartBlocking, onStopBlocking);
+        });
+
+        Trait.register("on_swing", nbt -> {
+            var command = CommandCallback.get(nbt, "command");
+            return new OnSwing(command);
+        });
+
+        Trait.register("on_attacked", nbt -> {
+            var attacker = CommandCallback.get(nbt, "attacker_command");
+            var target = CommandCallback.get(nbt, "target_command");
+            return new OnAttacked(attacker, target);
+        });
     }
 
     private void registerEvents() {
