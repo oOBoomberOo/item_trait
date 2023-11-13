@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "item_trait",
+  "version": "${version}",
+  "name": "Item Trait",
+  "description": "",
+  "authors": [],
+  "contact": {
+    "repo": "https://github.com/oOBoomberOo/Item Trait"
+  },
+  "license": "All-Rights-Reserved",
+  "icon": "assets/item_trait/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "me.boomber.item_trait.client.ItemTraitClient"
+    ],
+    "main": [
+      "me.boomber.item_trait.ItemTrait"
+    ]
+  },
+  "mixins": [
+    "item_trait.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
