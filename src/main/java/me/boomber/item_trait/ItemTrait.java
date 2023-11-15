@@ -1,6 +1,8 @@
 package me.boomber.item_trait;
 
 import me.boomber.item_trait.data.*;
+import me.boomber.item_trait.entity.LaserBeam;
+import me.boomber.item_trait.entity.LaserBeamMarker;
 import me.boomber.item_trait.impl.PlayerBreakBlockTrait;
 import me.boomber.item_trait.packet.PlayerSwingPacket;
 import me.boomber.item_trait.trait.Trait;
@@ -9,18 +11,41 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.entity.MobCategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.function.Supplier;
 
 public class ItemTrait implements ModInitializer {
-    public static final Logger LOGGER = LoggerFactory.getLogger("item_trait");
+    public static final String MOD_ID = "item_trait";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+    public static final EntityType<LaserBeamMarker> LASER_BEAM_MARKER_ENTITY_TYPE = FabricEntityTypeBuilder.create(MobCategory.MISC, LaserBeamMarker::new)
+            .fireImmune()
+            .disableSummon()
+            .disableSaving()
+            .dimensions(EntityDimensions.fixed(0f,0f))
+            .trackRangeChunks(0)
+            .build();
+
+    public static final EntityType<LaserBeam> LASER_BEAM_ENTITY_TYPE = FabricEntityTypeBuilder.create(MobCategory.MISC, LaserBeam::new)
+            .fireImmune()
+            .dimensions(EntityDimensions.fixed(1f,1f))
+            .trackRangeChunks(4)
+            .build();
+
 
     /**
      * Runs the mod initializer.
@@ -29,9 +54,47 @@ public class ItemTrait implements ModInitializer {
     public void onInitialize() {
         LOGGER.info("initialized mod");
 
+        registerEntities();
         registerEvents();
         registerNetwork();
+        registerTraits();
+    }
 
+    public static ResourceLocation of(String path) {
+        return new ResourceLocation(MOD_ID, path);
+    }
+
+    private void registerEntities() {
+        Registry.register(BuiltInRegistries.ENTITY_TYPE, new ResourceLocation("bb:laser_beam_marker"), LASER_BEAM_MARKER_ENTITY_TYPE);
+        Registry.register(BuiltInRegistries.ENTITY_TYPE, new ResourceLocation("bb:laser_beam"), LASER_BEAM_ENTITY_TYPE);
+        FabricDefaultAttributeRegistry.register(LASER_BEAM_ENTITY_TYPE, LaserBeam.createAttributes());
+        FabricDefaultAttributeRegistry.register(LASER_BEAM_MARKER_ENTITY_TYPE, LaserBeamMarker.createLivingAttributes());
+    }
+
+    private void registerEvents() {
+        AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+            if (player.isSpectator()) {
+                return InteractionResult.PASS;
+            }
+
+            var itemStack = player.getItemInHand(hand);
+            Trait.perform(itemStack, it -> {
+                if (entity instanceof LivingEntity e) {
+                    it.onHurt(world, player, e, itemStack);
+                }
+            });
+
+            return InteractionResult.PASS;
+        });
+
+        PlayerBlockBreakEvents.BEFORE.register(new PlayerBreakBlockTrait());
+    }
+
+    private void registerNetwork() {
+        ServerPlayNetworking.registerGlobalReceiver(PlayerSwingPacket.ID, PlayerSwingPacket::handle);
+    }
+
+    private void registerTraits() {
         Trait.register("on_used", OnUsed::parse);
 
         Trait.registerList("effects", nbt -> {
@@ -62,28 +125,5 @@ public class ItemTrait implements ModInitializer {
             var target = CommandCallback.get(nbt, "target_command");
             return new OnAttacked(attacker, target);
         });
-    }
-
-    private void registerEvents() {
-        AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
-            if (player.isSpectator()) {
-                return InteractionResult.PASS;
-            }
-
-            var itemStack = player.getItemInHand(hand);
-            Trait.perform(itemStack, it -> {
-                if (entity instanceof LivingEntity e) {
-                    it.onHurt(world, player, e, itemStack);
-                }
-            });
-
-            return InteractionResult.PASS;
-        });
-
-        PlayerBlockBreakEvents.BEFORE.register(new PlayerBreakBlockTrait());
-    }
-
-    private void registerNetwork() {
-        ServerPlayNetworking.registerGlobalReceiver(PlayerSwingPacket.ID, PlayerSwingPacket::handle);
     }
 }
