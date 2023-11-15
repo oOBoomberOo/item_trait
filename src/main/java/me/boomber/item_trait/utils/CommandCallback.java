@@ -10,8 +10,8 @@ public record CommandCallback(@Nullable String command) {
         MinecraftServer server = entity.getServer();
 
         if (server != null && command != null) {
-            var stack = entity.createCommandSourceStack();
-            server.getCommands().performPrefixedCommand(stack, command);
+            var stack = server.createCommandSourceStack();
+            server.getCommands().performPrefixedCommand(stack, "execute as %s at @s run %s".formatted(entity.getUUID(), command));
         }
     }
 

@@ -42,8 +42,10 @@ public class ItemTrait implements ModInitializer {
 
     public static final EntityType<LaserBeam> LASER_BEAM_ENTITY_TYPE = FabricEntityTypeBuilder.create(MobCategory.MISC, LaserBeam::new)
             .fireImmune()
-            .dimensions(EntityDimensions.fixed(1f,1f))
+            .dimensions(EntityDimensions.fixed(0f,0f))
             .trackRangeChunks(4)
+            .forceTrackedVelocityUpdates(true)
+            .trackedUpdateRate(1)
             .build();
 
 
