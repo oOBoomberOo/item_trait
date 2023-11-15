@@ -97,14 +97,7 @@ public class ItemTrait implements ModInitializer {
     private void registerTraits() {
         Trait.register("on_used", OnUsed::parse);
 
-        Trait.registerList("effects", nbt -> {
-            var effects = nbt.stream()
-                    .map(it -> (CompoundTag) it)
-                    .map(it -> (Supplier<MobEffectInstance>) () -> MobEffectInstance.load(it))
-                    .toList();
-
-            return new TippedEffects(effects);
-        });
+        Trait.registerList("effects", TippedEffects::parse);
 
         Trait.register("pickaxe", nbt -> {
             var size = nbt.getInt("size");
