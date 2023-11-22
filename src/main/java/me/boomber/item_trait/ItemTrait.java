@@ -110,7 +110,8 @@ public class ItemTrait implements ModInitializer {
             var onBlocked = CommandCallback.get(nbt, "on_blocked");
             var onStartBlocking = CommandCallback.get(nbt, "on_start_blocking");
             var onStopBlocking = CommandCallback.get(nbt, "on_stop_blocking");
-            return new Shield(onBlocked, onStartBlocking, onStopBlocking);
+            var bypassDirection = nbt.getBoolean("bypass_direction");
+            return new Shield(onBlocked, onStartBlocking, onStopBlocking, bypassDirection);
         });
 
         Trait.register("on_swing", OnSwing::parse);

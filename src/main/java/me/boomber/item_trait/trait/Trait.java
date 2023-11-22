@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -28,6 +29,10 @@ public class Trait {
 
     public static void registerList(String name, Function<ListTag, Trait> factory) {
         TraitRegistry.INSTANCE.registerList(name, factory);
+    }
+
+    public static <T> Optional<T> get(ItemStack itemStack, Class<T> trait) {
+        return TraitRegistry.INSTANCE.getOrCreate(itemStack).stream().filter(trait::isInstance).map(trait::cast).findFirst();
     }
 
     public void onRelease(Level level, LivingEntity entity, ItemStack itemStack) {}

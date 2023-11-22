@@ -1,13 +1,16 @@
 package me.boomber.item_trait.mixins;
 
 import me.boomber.item_trait.attributes.ITAttributes;
+import me.boomber.item_trait.data.Shield;
 import me.boomber.item_trait.trait.Trait;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -19,6 +22,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
     @Shadow public abstract ItemStack getItemInHand(InteractionHand interactionHand);
+
+    @Shadow public abstract ItemStack getUseItem();
 
     @Inject(method = "startUsingItem", at = @At("HEAD"))
     public void startUsingItem(InteractionHand interactionHand, CallbackInfo ci) {
@@ -58,5 +63,18 @@ public abstract class LivingEntityMixin {
                 .add(ITAttributes.SINK_SPEED)
                 .add(ITAttributes.BLAST_RESISTANCE);
         cir.setReturnValue(builder);
+    }
+
+    @Inject(method = "isDamageSourceBlocked", at = @At("HEAD"), cancellable = true)
+    public void shieldBlockAllDirection(DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
+        var item = getUseItem();
+
+        if (!damageSource.is(DamageTypeTags.BYPASSES_SHIELD) && item.is(Items.SHIELD)) {
+            var bypassDirection = Trait.get(item, Shield.class).map(Shield::isBypassDirection).orElse(false);
+
+            if (bypassDirection) {
+                cir.setReturnValue(true);
+            }
+        }
     }
 }

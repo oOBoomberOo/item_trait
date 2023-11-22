@@ -14,6 +14,7 @@ public class Shield extends Trait {
     final CommandCallback onBlocked;
     final CommandCallback startBlocking;
     final CommandCallback stopBlocking;
+    final boolean bypassDirection;
 
     @Override
     public void onStartUsing(LivingEntity entity, ItemStack itemStack) {
