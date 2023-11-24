@@ -1,5 +1,6 @@
 package me.boomber.item_trait;
 
+import me.boomber.item_trait.command.ScanCommand;
 import me.boomber.item_trait.data.*;
 import me.boomber.item_trait.entity.LaserBeam;
 import me.boomber.item_trait.entity.LaserBeamMarker;
@@ -8,6 +9,7 @@ import me.boomber.item_trait.packet.PlayerSwingPacket;
 import me.boomber.item_trait.trait.Trait;
 import me.boomber.item_trait.utils.CommandCallback;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -60,6 +62,10 @@ public class ItemTrait implements ModInitializer {
         registerEvents();
         registerNetwork();
         registerTraits();
+
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            ScanCommand.register(dispatcher);
+        });
     }
 
     public static ResourceLocation of(String path) {
