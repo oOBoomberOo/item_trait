@@ -1,6 +1,7 @@
 package me.boomber.item_trait;
 
 import me.boomber.item_trait.command.ScanCommand;
+import me.boomber.item_trait.criterion.PotionSplashCriterion;
 import me.boomber.item_trait.data.*;
 import me.boomber.item_trait.entity.LaserBeam;
 import me.boomber.item_trait.entity.LaserBeamMarker;
@@ -15,20 +16,17 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.function.Supplier;
 
 public class ItemTrait implements ModInitializer {
     public static final String MOD_ID = "item_trait";
@@ -50,6 +48,7 @@ public class ItemTrait implements ModInitializer {
             .trackedUpdateRate(1)
             .build();
 
+    public static final PotionSplashCriterion POTION_SPLASH_CRITERION = CriteriaTriggers.register(new PotionSplashCriterion());
 
     /**
      * Runs the mod initializer.
@@ -63,9 +62,7 @@ public class ItemTrait implements ModInitializer {
         registerNetwork();
         registerTraits();
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            ScanCommand.register(dispatcher);
-        });
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ScanCommand.register(dispatcher));
     }
 
     public static ResourceLocation of(String path) {
