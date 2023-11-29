@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "item_trait",
+  "id": "spice",
   "version": "${version}",
-  "name": "Item Trait",
+  "name": "Spice",
   "description": "",
   "authors": [],
   "contact": {
@@ -13,14 +13,14 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "me.boomber.item_trait.client.ItemTraitClient"
+      "me.boomber.spice.client.SpiceClient"
     ],
     "main": [
-      "me.boomber.item_trait.ItemTrait"
+      "me.boomber.spice.Spice"
     ]
   },
   "mixins": [
-    "item_trait.mixins.json"
+    "spice.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=${loader_version}",

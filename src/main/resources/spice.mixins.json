@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "me.boomber.spice.mixins",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "ItemMixin",
+    "LivingEntityMixin",
+    "PlayerMixin",
+    "ThrownPotionMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
